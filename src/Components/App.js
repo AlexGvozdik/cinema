@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Movie from './movie/Movie';
-const TRENDING_API = 'https://api.themoviedb.org/3/trending/movie/day?api_key=4468f2edfc46f46a87b22906b9351926'
-const GENRES_API = 'https://api.themoviedb.org/3/genre/movie/list?api_key=4468f2edfc46f46a87b22906b9351926'
+
 const apiKey = '4468f2edfc46f46a87b22906b9351926';
 const url = 'https://api.themoviedb.org/3';
 const genreUrl = `${url}/genre/movie/list`;
@@ -11,7 +10,7 @@ const moviesUrl = `${url}/discover/movie`;
 function App() {
   const [movies, setMovies] = useState([]);
   const [genres, setGenres] = useState([]);
-  const [currentPage,setCurrentPage] = useState(99);
+  const [currentPage,setCurrentPage] = useState(2);
   
   const fetchMovieByGenre = async (genre_id) => {
       try {
@@ -29,12 +28,8 @@ function App() {
             
               id: m['id'],
               backPoster: posterUrl + m['backdrop_path'],
-              popularity: m['popularith'],
               title: m['title'],
-              poster: posterUrl + m['poster_path'],
-          overview: m['overview'],
               year:m['release_date'],
-          rating: m['vote_average'],
           genres:m['genre_ids']
           }))
             console.log(modifiedData)
@@ -59,28 +54,30 @@ function App() {
   } catch (error) { }
   }
   useEffect(() => {
-    
-
-
-
     const fetchAPI = async () => {
       setMovies(await fetchMovieByGenre(28));
       setGenres(await fetchGenre())
     };
-
     fetchAPI();
-  }, [])
-  
+  }, [currentPage])
   async function handler(e) {
     const valueGenre = e.target.value;
     const result = genres.filter(({ name }) => name === valueGenre);
     const idRes = result[0].id
     setMovies(await fetchMovieByGenre(idRes));
-
   }
-
-
-
+  function next() {
+    setCurrentPage(prev => prev+1)
+  }
+  function prev() {
+setCurrentPage(prev => {
+          if (prev === 1) return prev;
+          return prev - 1;
+})
+  }
+  function first() {setCurrentPage(prev => prev = 1)}
+  function second(){setCurrentPage(prev => prev = 2)}
+  function third(){setCurrentPage(prev => prev = 3)}
   return (
     <>
       <header>
@@ -106,7 +103,11 @@ function App() {
       {movies.length > 0 &&
         movies.slice(0, 2).map(movie => <Movie genresArr={genres} key={movie.id} {...movie} />)}
       <div>
-        <button onClick={() => setCurrentPage(prev => prev +1)}>NEXT</button>
+        <button onClick={prev}>PREV</button>
+        <button onClick={first}>1</button>
+        <button onClick={second}>2</button>
+        <button onClick={third}>3</button>
+        <button onClick={next}>NEXT</button>
       </div>
     </>
   );
